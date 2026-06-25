@@ -99,10 +99,6 @@
   .card { border: 0.75px solid #e0e4ea; border-radius: 7px; padding: 9px 10px 8px; background: #fff; break-inside: avoid; display: flex; flex-direction: column; cursor: pointer; transition: box-shadow .15s, border-color .15s; }
   .card:hover { box-shadow: 0 2px 10px rgba(0,45,98,.12); border-color: #b0c4de; }
   .card.hidden { display: none; }
-  .card { position: relative; }
-  .status-badge { position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; gap: 4px; font-size: 9.5px; font-weight: 700; letter-spacing: .03em; padding: 1.5px 7px; border-radius: 20px; z-index: 1; background: #FBEAE7; color: #B0331F; }
-  .status-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #B0331F; }
-  .card[data-status='waitlist'] .card-title { padding-right: 62px; }
   .card-top { display: flex; align-items: flex-start; gap: 7px; margin-bottom: 6px; }
   .subj-icon { width: 24px; height: 24px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
   .card-info { flex: 1; min-width: 0; }
@@ -177,9 +173,6 @@
   <button class="fbtn" data-type="period" data-val="Period 1" style="border-color:#555;color:#555" onclick="toggle(this)">P1</button>
   <button class="fbtn" data-type="period" data-val="Period 2" style="border-color:#555;color:#555" onclick="toggle(this)">P2</button>
   <button class="fbtn" data-type="period" data-val="Period 3" style="border-color:#555;color:#555" onclick="toggle(this)">P3</button>
-  <div class="sep"></div>
-  <button class="fbtn" data-type="status" data-val="open" style="border-color:#1B7A3D;color:#1B7A3D" onclick="toggle(this)">Open</button>
-  <button class="fbtn" data-type="status" data-val="waitlist" style="border-color:#B0331F;color:#B0331F" onclick="toggle(this)">Waitlist</button>
   <div class="sep"></div>
   <button class="fbtn" style="border-color:#bbb;color:#999;font-size:10px" onclick="clearAll()">Clear all</button>
 </div>
@@ -1369,7 +1362,6 @@ usedSubjects.forEach(s => {
 
 // Build grid
 const grid = document.getElementById('grid');
-const WAITLIST = new Set(["ai1-5a-tue3-f26", "ai2-5b-thu3-f26", "ai3-5b-tue3-f26", "art1-10-wed2-f26", "art2-10-tue2-f26", "art3-5a-wed2-f26", "art4-5a-thu3-f26", "art6-5a-wed3-f26", "ce1-10-wed2-f26", "ce2-10-thu3-f26", "film2-5b-tue2-f26", "film4-5a-thu1-f26", "hg1-5b-thu3-f26", "hg11-10-tue3-f26", "hg12-sci-10-wed2-f26", "hg15-5a-tue3-f26", "hg16-10-tue1-f26", "hg17-5a-tue3-f26", "hg18-10-thu1-f26", "hg2-5b-thu2-f26", "hg4-5a-wed1-f26", "hg5-lit-5a-thu2-f26", "hg6-ce-5b-thu2-f26", "hg7-film-10-thu3-f26", "hg8-10-tue2-f26", "hg9-10-wed2-f26", "lit1-10-thu2-f26", "lit10-10-thu1-f26", "lit2-5a-thu3-f26", "lit4-10-tue2-f26", "lit7-5a-thu2-f26", "lit9-10-tue1-f26", "mus10-fri2-f26", "mus2-5a-tue1-f26", "mus4-5b-wed2-f26", "mus7-5a-wed1-f26", "soc4-5b-tue1-f26", "soc6-5a-tue2-f26", "soc8-10-tue1-f26", "soc9-5b-tue3-f26", "wri1-10-wed1-f26"].map(s=>s.toLowerCase()));
 courses.forEach((c, idx) => {
   const sc = subjectConfig[c.subject] || subjectConfig.LIT;
   const lc = lengthConfig[c.length] || lengthConfig["10"];
@@ -1385,12 +1377,10 @@ courses.forEach((c, idx) => {
   card.dataset.modality = mKey;
   card.dataset.day = c.day || '';
   card.dataset.period = c.period || '';
-  card.dataset.status = WAITLIST.has((c.code||"").toLowerCase()) ? "waitlist" : "open";
   card.dataset.idx = idx;
   card.onclick = () => openModal(idx);
 
   card.innerHTML = `
-    ${card.dataset.status === "waitlist" ? '<div class="status-badge">Waitlist</div>' : ""}
     <div class="card-top">
       <div class="subj-icon" style="background:${sc.bg}">${sc.emoji}</div>
       <div class="card-info">
@@ -1481,7 +1471,7 @@ function closeModalDirect() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
 
 // Filters
-const active = {subject:null, length:null, modality:null, day:null, period:null, status:null};
+const active = {subject:null, length:null, modality:null, day:null, period:null};
 function toggle(btn) {
   const type = btn.dataset.type, val = btn.dataset.val;
   const wasActive = active[type] === val;
@@ -1508,8 +1498,7 @@ function applyFilters() {
                && (!active.length || active.length === card.dataset.length)
                && (!active.modality || active.modality === card.dataset.modality)
                && (!active.day || active.day === card.dataset.day)
-               && (!active.period || active.period === card.dataset.period)
-               && (!active.status || active.status === card.dataset.status);
+               && (!active.period || active.period === card.dataset.period);
     const searchMatch = !searchTerm || [
       c.title, c.sgl, c.desc, c.bio, c.materials, c.style, c.prep, c.dates, c.code, c.subject
     ].some(f => (f||'').toLowerCase().includes(searchTerm));
