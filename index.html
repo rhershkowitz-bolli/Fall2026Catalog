@@ -99,6 +99,14 @@
   .card { border: 0.75px solid #e0e4ea; border-radius: 7px; padding: 9px 10px 8px; background: #fff; break-inside: avoid; display: flex; flex-direction: column; cursor: pointer; transition: box-shadow .15s, border-color .15s; }
   .card:hover { box-shadow: 0 2px 10px rgba(0,45,98,.12); border-color: #b0c4de; }
   .card.hidden { display: none; }
+  .card { position: relative; }
+  .status-stack { flex-shrink: 0; width: 40px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 1px; }
+  .status-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .status-word { font-size: 8.5px; font-weight: 700; letter-spacing: .02em; text-align: center; line-height: 1; }
+  .card[data-status='waitlist'] .status-dot { background: #B0331F; }
+  .card[data-status='waitlist'] .status-word { color: #B0331F; }
+  .card[data-status='open'] .status-dot { background: #1B7A3D; }
+  .card[data-status='open'] .status-word { color: #1B7A3D; }
   .card-top { display: flex; align-items: flex-start; gap: 7px; margin-bottom: 6px; }
   .subj-icon { width: 24px; height: 24px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
   .card-info { flex: 1; min-width: 0; }
@@ -173,6 +181,9 @@
   <button class="fbtn" data-type="period" data-val="Period 1" style="border-color:#555;color:#555" onclick="toggle(this)">P1</button>
   <button class="fbtn" data-type="period" data-val="Period 2" style="border-color:#555;color:#555" onclick="toggle(this)">P2</button>
   <button class="fbtn" data-type="period" data-val="Period 3" style="border-color:#555;color:#555" onclick="toggle(this)">P3</button>
+  <div class="sep"></div>
+  <button class="fbtn" data-type="status" data-val="open" style="border-color:#1B7A3D;color:#1B7A3D" onclick="toggle(this)">Open</button>
+  <button class="fbtn" data-type="status" data-val="waitlist" style="border-color:#B0331F;color:#B0331F" onclick="toggle(this)">Waitlist</button>
   <div class="sep"></div>
   <button class="fbtn" style="border-color:#bbb;color:#999;font-size:10px" onclick="clearAll()">Clear all</button>
 </div>
@@ -609,23 +620,6 @@ const courses = [
     "prep": "About an hour",
     "desc": "Amidst the Great Depression of the 1930s, a type of popular music emerged that was energetic, large in scale, and above all meant for dancing. Swing big bands were the popular music of the 1930s, evolving in the dance halls of Harlem and eventually disseminating across the United States. With names such as Duke Ellington, Count Basie, Glenn Miller, Benny Goodman, and Tommy Dorsey, the big band era offered Americans a chance to forget the hardships of the Great Depression and dance along to the swinging sounds of these large ensembles. Yet the history of big bands within the broader history of jazz presents some interesting differences in the way we often think about jazz. Big band music is frequently more predetermined and written out, with fewer moments for improvisation. Big bands were also a form of popular music and, at the time, were not considered art music in the way jazz often is today. This five-week course offers participants the chance to study in depth four different big band leaders, each of whom made a unique contribution to the development of swing big band music and is distinct in their sound, composition, and approach to arranging for the large ensemble. No prior musical training is required, as any necessary music theory will be explained.",
     "bio": "Scholar, educator, and Grammy-nominated bassist, Australian James Heazlewood-Dale relocated to Boston to study jazz at Berklee and then the New England Conservatory, both on full scholarships. He has since performed with artists including Jacob Collier, Maria Schneider, and Terence Blanchard. He received his Ph.D. in musicology from Brandeis University, winning the prestigious Brandeis University Provost Research Award for his doctoral work on the intersection of jazz and video game music. James's research can be read in <em>Jazz and Culture</em> and <em>Environmental Humanities and the Video Game</em>. He currently teaches at Brandeis University, where he lectures on game studies and ludomusicology."
-  },
-  {
-    "title": "Starvation and Story: Understanding Anorexia",
-    "sgl": "Judy Feldman",
-    "subject": "SOC",
-    "length": "5b",
-    "modality": "in-person",
-    "day": "Tuesday",
-    "period": "Period 1",
-    "time": "9:30-10:55 AM",
-    "dates": "Oct 20 - Nov 17",
-    "code": "SOC4-5b-Tue1-F26",
-    "style": "More facilitated discussion than lecture",
-    "materials": "<em>My Good Bright Wolf</em>, a Memoir by Sarah Moss (Farrar, Straus and Giroux, 2024). Additional materials on class website.",
-    "prep": "2-3 hours/week (1-2 hours required reading, 1 hour supplementary)",
-    "desc": "<em>My Good Bright Wolf</em> by Sarah Moss offers a synthesis of personal experience, literary craft, and psychological insight. Using her luminous memoir as our foundation, this 5-week course will explore the complex reality of anorexia nervosa from multiple angles. The course blends literary analysis with clinical and cultural perspectives. Each week pairs chapters from the memoir with readings on diagnosis, family history, etiology, medical complications, treatment models, feminist perspectives, and recovery.\n\nThrough guided discussion and interdisciplinary inquiry, students will deepen their understanding of how anorexia affects the body, mind, and relationships—and how narrative can illuminate the path to healing.\n\nThe memoir itself will be our only textbook, but participants will be given links to readings about each weekly topic. No medical or psychiatric knowledge is required for this course, but there will be optional journal articles for those who wish to delve more deeply into one or more of these areas.\n\nMost of us have had personal experiences with eating disorders: a family member, a friend, ourselves. At the get-acquainted session before the start of the course, participants will have the opportunity to share, briefly, any personal experiences they would like to discuss. This is not a requirement, but it will help us to put those personal stories aside as we focus on the book and the other readings.",
-    "bio": "Judy Feldman joined BOLLI in 2023 after a 50-year career as a psychiatrist with a subspecialty in treating eating disorders. She has taught continuing education courses and has led short story discussions in the BOLLI New Yorker group. She has always loved the novels and short stories of Haruki Murakami; their illumination of human character and suffering and their underpinnings of mystery."
   },
   {
     "title": "From Plague to Civil War: A Literary Journey",
@@ -1277,6 +1271,7 @@ usedSubjects.forEach(s => {
 
 // Build grid
 const grid = document.getElementById('grid');
+const WAITLIST = new Set(["ai1-5a-tue3-f26", "ai2-5b-thu3-f26", "art1-10-wed2-f26", "art2-10-tue2-f26", "film1-lit-10-mon3-f26", "film2-5b-tue2-f26", "film3-5a-mon2-f26", "film4-5a-thu1-f26", "hg11-10-tue3-f26", "hg12-sci-10-wed2-f26", "hg13-10-mon3-f26", "hg14-5a-mon1-f26", "hg17-5a-tue3-f26", "hg18-10-thu1-f26", "hg19-lit-5b-mon2-f26", "hg4-5a-wed1-f26", "hg5-lit-5a-thu2-f26", "hg6-ce-5b-thu2-f26", "hg8-10-tue2-f26", "lit1-10-thu2-f26", "lit10-10-thu1-f26", "lit12-film-5b-mon3-f26", "lit3-10-mon2-f26", "lit4-10-tue2-f26", "lit5-10-mon2-f26", "lit6-5b-mon1-f26", "lit7-5a-thu2-f26", "lit9-10-tue1-f26", "mus1-5a-fri1-f26", "mus2-5a-tue1-f26", "mus4-5b-wed2-f26", "mus5-5b-mon3-f26", "soc2-hg-5a-mon1-f26", "soc6-5a-tue2-f26", "soc9-5b-tue3-f26"].map(s=>s.toLowerCase()));
 courses.forEach((c, idx) => {
   const sc = subjectConfig[c.subject] || subjectConfig.LIT;
   const lc = lengthConfig[c.length] || lengthConfig["10"];
@@ -1292,12 +1287,13 @@ courses.forEach((c, idx) => {
   card.dataset.modality = mKey;
   card.dataset.day = c.day || '';
   card.dataset.period = c.period || '';
+  card.dataset.status = WAITLIST.has((c.code||"").toLowerCase()) ? "waitlist" : "open";
   card.dataset.idx = idx;
   card.onclick = () => openModal(idx);
 
   card.innerHTML = `
     <div class="card-top">
-      <div class="subj-icon" style="background:${sc.bg}">${sc.emoji}</div>
+      <div class="status-stack"><span class="status-dot"></span><span class="status-word">${card.dataset.status === "waitlist" ? "Waitlist" : "Open"}</span></div>
       <div class="card-info">
         <div class="card-title">${c.title}</div>
         <div class="card-sgl">${c.sgl}</div>
@@ -1386,7 +1382,7 @@ function closeModalDirect() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
 
 // Filters
-const active = {subject:null, length:null, modality:null, day:null, period:null};
+const active = {subject:null, length:null, modality:null, day:null, period:null, status:null};
 function toggle(btn) {
   const type = btn.dataset.type, val = btn.dataset.val;
   const wasActive = active[type] === val;
@@ -1413,7 +1409,8 @@ function applyFilters() {
                && (!active.length || active.length === card.dataset.length)
                && (!active.modality || active.modality === card.dataset.modality)
                && (!active.day || active.day === card.dataset.day)
-               && (!active.period || active.period === card.dataset.period);
+               && (!active.period || active.period === card.dataset.period)
+               && (!active.status || active.status === card.dataset.status);
     const searchMatch = !searchTerm || [
       c.title, c.sgl, c.desc, c.bio, c.materials, c.style, c.prep, c.dates, c.code, c.subject
     ].some(f => (f||'').toLowerCase().includes(searchTerm));
